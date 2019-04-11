@@ -15,7 +15,7 @@ You will be able to:
 
 Once again, here's the schema for the CRM database you'll continue to practice with.
 
-<img src="images/Database-Schema.png" width=600>
+<img src="images/Database-Schema.png" width="600">
 
 ## Connect to the Database
 
