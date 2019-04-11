@@ -15,7 +15,7 @@ You will be able to:
 
 Once again, here's the schema for the CRM database you'll continue to practice with.
 
-<img src="Database-Schema.png" width=600>
+<img src="images/Database-Schema.png" width=600>
 
 ## Connect to the Database
 
@@ -82,7 +82,7 @@ This problem is a bit tougher. To start, think about how you might break the pro
 #Your code here
 ```
 
-# Select the Employee Number, Name (First and Last) and Number of Customers of Employees Who's Customers Have an Average Credit Limit of Over 15K
+## Select the Employee Number, Name (First and Last) and Number of Customers of Employees Who's Customers Have an Average Credit Limit of Over 15K
 
 
 ```python
