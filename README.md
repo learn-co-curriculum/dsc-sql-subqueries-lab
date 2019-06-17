@@ -35,61 +35,6 @@ conn = sqlite3.Connection('data.sqlite')
 c = conn.cursor()
 ```
 
-## Select the Average Number of Orders on a Product by Product Basis
-
-
-```python
-#Your code here; use a subquery. No join will be necessary.
-c.execute("""select AVG(numOrders)
-                    from (select productCode,
-                                 count(distinct orderNumber) as numOrders
-                                 from products
-                                 join orderdetails
-                                 using(productCode)
-                                 group by 1
-                         );
-          """
-         )
-df = pd.DataFrame(c.fetchall())
-df.columns = [x[0] for x in c.description]
-df
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>AVG(numOrders)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>27.486239</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
 ## Write an Equivalent Query using a Subquery
 
 ```SQL
