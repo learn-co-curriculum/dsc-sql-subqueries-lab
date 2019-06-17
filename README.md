@@ -31,13 +31,6 @@ As usual, start by importing the necessary packages and connecting to the databa
 #Your code here; create the connection and cursor
 ```
 
-## Select the Average Number of Orders on a Product by Product Basis
-
-
-```python
-#Your code here; use a subquery. No join will be necessary.
-```
-
 ## Write an Equivalent Query using a Subquery
 
 ```SQL
