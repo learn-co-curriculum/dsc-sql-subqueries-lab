@@ -9,6 +9,7 @@ Now that you've seen how subqueries work, it's time to get some practice writing
 
 You will be able to:
 
+* Write complex queries
 * Write subqueries to decompose complex queries
 
 ## CRM Database Schema
@@ -32,7 +33,7 @@ import pandas as pd
 ```python
 #Your code here
 conn = sqlite3.Connection('data.sqlite')
-c = conn.cursor()
+cur = conn.cursor()
 ```
 
 ## Write an Equivalent Query using a Subquery
@@ -50,15 +51,14 @@ select customerNumber,
 
 ```python
 #Your code here; use a subquery. No join will be necessary.
-c.execute("""select customerNumber,
-                    contactLastName,
-                    contactFirstName
-                    from customers
-                    where customerNumber in (select customerNumber from orders where orderDate = '2003-01-31');
-          """
-         )
-df = pd.DataFrame(c.fetchall())
-df.columns = [x[0] for x in c.description]
+cur.execute("""SELECT customerNumber, contactLastName, contactFirstName
+               FROM customers
+               WHERE customerNumber IN (SELECT customerNumber 
+                                        FROM orders 
+                                        WHERE orderDate = '2003-01-31');
+                                        """)
+df = pd.DataFrame(cur.fetchall())
+df.columns = [x[0] for x in cur.description]
 df
 ```
 
@@ -108,20 +108,21 @@ Sort the results by the total number of items sold for that product.
 
 ```python
 #Your code here
-c.execute("""select productName,
-                    count(distinct orderNumber) as numberOrders,
-                    sum(quantityOrdered) as totalUnitsSold
-                    from products
-                    join orderdetails
-                    using (productCode)
-                    group by 1
-                    order by totalUnitsSold desc;
-          """
-         )
-df = pd.DataFrame(c.fetchall())
-df.columns = [x[0] for x in c.description]
-df.head()
+cur.execute("""SELECT productName, COUNT(orderNumber) as numberOrders, SUM(quantityOrdered) as totalUnitsSold
+               FROM products
+               JOIN orderdetails
+               USING (productCode)
+               GROUP BY 1
+               ORDER BY totalUnitsSold desc;
+               """)
+df = pd.DataFrame(cur.fetchall())
+df.columns = [x[0] for x in cur.description]
+print(df.shape)
+df.tail()
 ```
+
+    (109, 3)
+
 
 
 
@@ -151,34 +152,34 @@ df.head()
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>1992 Ferrari 360 Spider red</td>
-      <td>53</td>
-      <td>1808</td>
+      <th>104</th>
+      <td>1999 Indy 500 Monte Carlo SS</td>
+      <td>25</td>
+      <td>855</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>1937 Lincoln Berline</td>
-      <td>28</td>
-      <td>1111</td>
+      <th>105</th>
+      <td>1911 Ford Town Car</td>
+      <td>25</td>
+      <td>832</td>
     </tr>
     <tr>
-      <th>2</th>
-      <td>American Airlines: MD-11S</td>
-      <td>28</td>
-      <td>1085</td>
+      <th>106</th>
+      <td>1936 Mercedes Benz 500k Roadster</td>
+      <td>25</td>
+      <td>824</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>1941 Chevrolet Special Deluxe Cabriolet</td>
-      <td>28</td>
-      <td>1076</td>
+      <th>107</th>
+      <td>1970 Chevy Chevelle SS 454</td>
+      <td>25</td>
+      <td>803</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>1930 Buick Marquette Phaeton</td>
-      <td>28</td>
-      <td>1074</td>
+      <th>108</th>
+      <td>1957 Ford Thunderbird</td>
+      <td>24</td>
+      <td>767</td>
     </tr>
   </tbody>
 </table>
@@ -190,23 +191,26 @@ df.head()
 
 Sort the results in descending order.
 
+### A quick note on the SQL  `SELECT DISTINCT` statement:
+
+The `SELECT DISTINCT` statement is used to return only distinct values in the specified column. In other words, it removes the duplicate values in the column from the result set.
+
+Inside a table, a column often contains many duplicate values; and sometimes you only want to list the unique values. If you apply the `DISTINCT` clause to a column that has `NULL`, the `DISTINCT` clause will keep only one NULL and eliminates the other. In other words, the DISTINCT clause treats all `NULL` “values” as the same value.
+
 
 ```python
 #Your code here
-c.execute("""select productName,
-                    count(distinct customerNumber) numPurchasers
-                    from products
-                    join orderdetails
-                    using(productCode)
-                    join orders
-                    using (orderNumber)
-                    group by 1
-                    order by numPurchasers desc
-                    ;
-          """
-         )
-df = pd.DataFrame(c.fetchall())
-df.columns = [x[0] for x in c.description]
+cur.execute("""SELECT productName, COUNT(DISTINCT customerNumber) AS numPurchasers
+               FROM products
+               JOIN orderdetails
+               USING(productCode)
+               JOIN orders
+               USING(orderNumber)
+               GROUP BY 1
+               ORDER BY numPurchasers DESC;
+               """)
+df = pd.DataFrame(cur.fetchall())
+df.columns = [x[0] for x in cur.description]
 df.head()
 ```
 
@@ -267,40 +271,34 @@ df.head()
 
 
 
-## Select the Employee Number, Office Code, City (of the office), and Name (First and Last) of those Employees who Sold Products that Have Been Ordered by Less Then 20 people.
+## Select the Employee Number, First Name, Last Name, City (of the office), and Office Code of the Employees Who Sold Products Which Have Been Ordered by Less Then 20 people.
 
 This problem is a bit tougher. To start, think about how you might break the problem up. Be sure that your results only list each employee once.
 
 
 ```python
 #Your code here
-c.execute("""select distinct employeeNumber,
-                    officeCode,
-                    o.city,
-                    firstName,
-                    lastName
-                    from employees e
-                    join offices o
-                    using(officeCode)
-                    join customers c
-                    on e.employeeNumber = c.salesRepEmployeeNumber
-                    join orders
-                    using (customerNumber)
-                    join orderdetails
-                    using (orderNumber)
-                    where productCode in (select productCode
-                                                 from products
-                                                 join orderdetails
-                                                 using (productCode)
-                                                 join orders
-                                                 using (orderNumber)
-                                                 group by 1
-                                                 having count(distinct customerNumber) <= 20
-                                         );
-           """
-         )
-df = pd.DataFrame(c.fetchall())
-df.columns = [x[0] for x in c.description]
+cur.execute("""SELECT DISTINCT employeeNumber, officeCode, o.city, firstName, lastName
+               FROM employees e
+               JOIN offices o
+               USING(officeCode)
+               JOIN customers c
+               ON e.employeeNumber = c.salesRepEmployeeNumber
+               JOIN orders
+               USING(customerNumber)
+               JOIN orderdetails
+               USING(orderNumber)
+               WHERE productCode IN (SELECT productCode
+                                            FROM products
+                                            JOIN orderdetails
+                                            USING(productCode)
+                                            JOIN orders
+                                            USING(orderNumber)
+                                            GROUP BY productCode
+                                            HAVING COUNT(DISTINCT customerNumber) < 20);
+                                            """)
+df = pd.DataFrame(cur.fetchall())
+df.columns = [x[0] for x in cur.description]
 df
 ```
 
@@ -343,22 +341,6 @@ df
     </tr>
     <tr>
       <th>1</th>
-      <td>1401</td>
-      <td>4</td>
-      <td>Paris</td>
-      <td>Pamela</td>
-      <td>Castillo</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>1621</td>
-      <td>5</td>
-      <td>Tokyo</td>
-      <td>Mami</td>
-      <td>Nishi</td>
-    </tr>
-    <tr>
-      <th>3</th>
       <td>1501</td>
       <td>7</td>
       <td>London</td>
@@ -366,7 +348,7 @@ df
       <td>Bott</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>2</th>
       <td>1337</td>
       <td>4</td>
       <td>Paris</td>
@@ -374,15 +356,7 @@ df
       <td>Bondur</td>
     </tr>
     <tr>
-      <th>5</th>
-      <td>1286</td>
-      <td>3</td>
-      <td>NYC</td>
-      <td>Foon Yue</td>
-      <td>Tseng</td>
-    </tr>
-    <tr>
-      <th>6</th>
+      <th>3</th>
       <td>1166</td>
       <td>1</td>
       <td>San Francisco</td>
@@ -390,15 +364,15 @@ df
       <td>Thompson</td>
     </tr>
     <tr>
-      <th>7</th>
-      <td>1165</td>
-      <td>1</td>
-      <td>San Francisco</td>
-      <td>Leslie</td>
-      <td>Jennings</td>
+      <th>4</th>
+      <td>1286</td>
+      <td>3</td>
+      <td>NYC</td>
+      <td>Foon Yue</td>
+      <td>Tseng</td>
     </tr>
     <tr>
-      <th>8</th>
+      <th>5</th>
       <td>1612</td>
       <td>6</td>
       <td>Sydney</td>
@@ -406,15 +380,7 @@ df
       <td>Marsh</td>
     </tr>
     <tr>
-      <th>9</th>
-      <td>1188</td>
-      <td>2</td>
-      <td>Boston</td>
-      <td>Julie</td>
-      <td>Firrelli</td>
-    </tr>
-    <tr>
-      <th>10</th>
+      <th>6</th>
       <td>1611</td>
       <td>6</td>
       <td>Sydney</td>
@@ -422,7 +388,23 @@ df
       <td>Fixter</td>
     </tr>
     <tr>
-      <th>11</th>
+      <th>7</th>
+      <td>1401</td>
+      <td>4</td>
+      <td>Paris</td>
+      <td>Pamela</td>
+      <td>Castillo</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1621</td>
+      <td>5</td>
+      <td>Tokyo</td>
+      <td>Mami</td>
+      <td>Nishi</td>
+    </tr>
+    <tr>
+      <th>9</th>
       <td>1323</td>
       <td>3</td>
       <td>NYC</td>
@@ -430,7 +412,15 @@ df
       <td>Vanauf</td>
     </tr>
     <tr>
-      <th>12</th>
+      <th>10</th>
+      <td>1165</td>
+      <td>1</td>
+      <td>San Francisco</td>
+      <td>Leslie</td>
+      <td>Jennings</td>
+    </tr>
+    <tr>
+      <th>11</th>
       <td>1702</td>
       <td>4</td>
       <td>Paris</td>
@@ -438,20 +428,28 @@ df
       <td>Gerard</td>
     </tr>
     <tr>
-      <th>13</th>
-      <td>1504</td>
-      <td>7</td>
-      <td>London</td>
-      <td>Barry</td>
-      <td>Jones</td>
-    </tr>
-    <tr>
-      <th>14</th>
+      <th>12</th>
       <td>1216</td>
       <td>2</td>
       <td>Boston</td>
       <td>Steve</td>
       <td>Patterson</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>1188</td>
+      <td>2</td>
+      <td>Boston</td>
+      <td>Julie</td>
+      <td>Firrelli</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>1504</td>
+      <td>7</td>
+      <td>London</td>
+      <td>Barry</td>
+      <td>Jones</td>
     </tr>
   </tbody>
 </table>
@@ -459,24 +457,20 @@ df
 
 
 
-## Select the Employee Number, Name (First and Last) and Number of Customers of Employees Who's Customers Have an Average Credit Limit of Over 15K
+## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Who's Customers Have an Average Credit Limit of Over 15K
 
 
 ```python
 #Your code here
-c.execute("""select employeeNumber,
-                    firstName,
-                    lastName,
-                    count(distinct customerNumber)
-                    from employees e
-                    join customers c
-                    on e.employeeNumber = c.salesRepEmployeeNumber
-                    group by 1,2,3
-                    having AVG(creditLimit) > 15000;
-          """
-         )
-df = pd.DataFrame(c.fetchall())
-df.columns = [x[0] for x in c.description]
+cur.execute("""SELECT employeeNumber, firstName, lastName, COUNT(customerNumber) AS numCustomers
+               FROM employees e
+               JOIN customers c
+               ON e.employeeNumber = c.salesRepEmployeeNumber
+               GROUP BY 1,2,3
+               HAVING AVG(creditLimit) > 15000;
+               """)
+df = pd.DataFrame(cur.fetchall())
+df.columns = [x[0] for x in cur.description]
 df
 ```
 
@@ -504,7 +498,7 @@ df
       <th>employeeNumber</th>
       <th>firstName</th>
       <th>lastName</th>
-      <th>count(distinct customerNumber)</th>
+      <th>numCustomers</th>
     </tr>
   </thead>
   <tbody>
