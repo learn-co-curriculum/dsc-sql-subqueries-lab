@@ -9,6 +9,7 @@ Now that you've seen how subqueries work, it's time to get some practice writing
 
 You will be able to:
 
+* Write complex queries
 * Write subqueries to decompose complex queries
 
 ## CRM Database Schema
@@ -61,12 +62,19 @@ Sort the results by the total number of items sold for that product.
 
 Sort the results in descending order.
 
+### A quick note on the SQL  `SELECT DISTINCT` statement:
+
+The `SELECT DISTINCT` statement is used to return only distinct values in the specified column. In other words, it removes the duplicate values in the column from the result set.
+
+Inside a table, a column often contains many duplicate values; and sometimes you only want to list the unique values. If you apply the `DISTINCT` clause to a column that has `NULL`, the `DISTINCT` clause will keep only one NULL and eliminates the other. In other words, the DISTINCT clause treats all `NULL` “values” as the same value.
+
 
 ```python
-#Your code here
+#Your code here:
+# Hint: because one of the tables we'll be joining has duplicate customer numbers, you should use DISTINCT
 ```
 
-## Select the Employee Number, Office Code, City (of the office), and Name (First and Last) of those Employees who Sold Products that Have Been Ordered by Less Then 20 people.
+## Select the Employee Number, First Name, Last Name, City (of the office), and Office Code of the Employees Who Sold Products Which Have Been Ordered by Less Then 20 people.
 
 This problem is a bit tougher. To start, think about how you might break the problem up. Be sure that your results only list each employee once.
 
@@ -75,7 +83,7 @@ This problem is a bit tougher. To start, think about how you might break the pro
 #Your code here
 ```
 
-## Select the Employee Number, Name (First and Last) and Number of Customers of Employees Who's Customers Have an Average Credit Limit of Over 15K
+## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Who's Customers Have an Average Credit Limit of Over 15K
 
 
 ```python
