@@ -83,7 +83,7 @@ This problem is a bit tougher. To start, think about how you might break the pro
 #Your code here
 ```
 
-## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Who's Customers Have an Average Credit Limit of Over 15K
+## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Whose Customers Have an Average Credit Limit of Over 15K
 
 
 ```python
