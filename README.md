@@ -9,7 +9,6 @@ Now that you've seen how subqueries work, it's time to get some practice writing
 
 You will be able to:
 
-* Write complex queries
 * Write subqueries to decompose complex queries
 
 ## CRM Database Schema
