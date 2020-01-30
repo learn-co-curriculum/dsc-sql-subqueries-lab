@@ -23,29 +23,29 @@ As usual, start by importing the necessary packages and connecting to the databa
 
 
 ```python
-#Your code here; import the necessary packages
+# Your code here; import the necessary packages
 ```
 
 
 ```python
-#Your code here; create the connection and cursor
+# Your code here; create the connection and cursor
 ```
 
 ## Write an Equivalent Query using a Subquery
 
 ```SQL
-select customerNumber,
+SELECT customerNumber,
        contactLastName,
        contactFirstName
-       from customers
-       join orders 
-       using(customerNumber)
-       where orderDate = '2003-01-31';
+       FROM customers
+       JOIN orders 
+       USING(customerNumber)
+       WHERE orderDate = '2003-01-31';
 ```
 
 
 ```python
-#Your code here; use a subquery. No join will be necessary.
+# Your code here; use a subquery. No join is necessary 
 ```
 
 ## Select the Total Number of Orders for Each Product Name
@@ -54,7 +54,7 @@ Sort the results by the total number of items sold for that product.
 
 
 ```python
-#Your code here
+# Your code here
 ```
 
 ## Select the Product Name and the  Total Number of People Who Have Ordered Each Product
@@ -69,7 +69,7 @@ Inside a table, a column often contains many duplicate values; and sometimes you
 
 
 ```python
-#Your code here:
+# Your code here:
 # Hint: because one of the tables we'll be joining has duplicate customer numbers, you should use DISTINCT
 ```
 
@@ -79,14 +79,14 @@ This problem is a bit tougher. To start, think about how you might break the pro
 
 
 ```python
-#Your code here
+# Your code here
 ```
 
 ## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Whose Customers Have an Average Credit Limit of Over 15K
 
 
 ```python
-#Your code here
+# Your code here
 ```
 
 ## Summary
