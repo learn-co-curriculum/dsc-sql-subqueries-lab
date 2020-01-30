@@ -23,14 +23,12 @@ As usual, start by importing the necessary packages and connecting to the databa
 
 
 ```python
-#Your code here
 import sqlite3
 import pandas as pd
 ```
 
 
 ```python
-#Your code here
 conn = sqlite3.Connection('data.sqlite')
 cur = conn.cursor()
 ```
@@ -38,18 +36,17 @@ cur = conn.cursor()
 ## Write an Equivalent Query using a Subquery
 
 ```SQL
-select customerNumber,
+SELECT customerNumber,
        contactLastName,
        contactFirstName
-       from customers
-       join orders 
-       using(customerNumber)
-       where orderDate = '2003-01-31';
+       FROM customers
+       JOIN orders 
+       USING(customerNumber)
+       WHERE orderDate = '2003-01-31';
 ```
 
 
 ```python
-#Your code here; use a subquery. No join will be necessary.
 cur.execute("""SELECT customerNumber, contactLastName, contactFirstName
                FROM customers
                WHERE customerNumber IN (SELECT customerNumber 
@@ -106,12 +103,11 @@ Sort the results by the total number of items sold for that product.
 
 
 ```python
-#Your code here
 cur.execute("""SELECT productName, COUNT(orderNumber) as numberOrders, SUM(quantityOrdered) as totalUnitsSold
                FROM products
                JOIN orderdetails
                USING (productCode)
-               GROUP BY 1
+               GROUP BY productName
                ORDER BY totalUnitsSold desc;
                """)
 df = pd.DataFrame(cur.fetchall())
@@ -198,14 +194,13 @@ Inside a table, a column often contains many duplicate values; and sometimes you
 
 
 ```python
-#Your code here
 cur.execute("""SELECT productName, COUNT(DISTINCT customerNumber) AS numPurchasers
                FROM products
                JOIN orderdetails
                USING(productCode)
                JOIN orders
                USING(orderNumber)
-               GROUP BY 1
+               GROUP BY productName
                ORDER BY numPurchasers DESC;
                """)
 df = pd.DataFrame(cur.fetchall())
@@ -276,7 +271,6 @@ This problem is a bit tougher. To start, think about how you might break the pro
 
 
 ```python
-#Your code here
 cur.execute("""SELECT DISTINCT employeeNumber, officeCode, o.city, firstName, lastName
                FROM employees e
                JOIN offices o
@@ -460,12 +454,11 @@ df
 
 
 ```python
-#Your code here
 cur.execute("""SELECT employeeNumber, firstName, lastName, COUNT(customerNumber) AS numCustomers
                FROM employees e
                JOIN customers c
                ON e.employeeNumber = c.salesRepEmployeeNumber
-               GROUP BY 1,2,3
+               GROUP BY employeeNumber, firstName, lastName
                HAVING AVG(creditLimit) > 15000;
                """)
 df = pd.DataFrame(cur.fetchall())
