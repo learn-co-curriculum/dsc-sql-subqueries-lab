@@ -1,4 +1,3 @@
-
 # SQL Subqueries - Lab
 
 ## Introduction
@@ -11,7 +10,7 @@ You will be able to:
 
 * Write subqueries to decompose complex queries
 
-## CRM Database Schema
+## CRM Database ERD
 
 Once again, here's the schema for the CRM database you'll continue to practice with.
 
@@ -19,7 +18,7 @@ Once again, here's the schema for the CRM database you'll continue to practice w
 
 ## Connect to the Database
 
-As usual, start by importing the necessary packages and connecting to the database **data.sqlite**.
+As usual, start by importing the necessary packages and connecting to the database `data.sqlite`.
 
 
 ```python
@@ -30,32 +29,40 @@ import pandas as pd
 
 ```python
 conn = sqlite3.Connection('data.sqlite')
-cur = conn.cursor()
 ```
 
 ## Write an Equivalent Query using a Subquery
 
-```SQL
-SELECT customerNumber,
-       contactLastName,
-       contactFirstName
-       FROM customers
-       JOIN orders 
-       USING(customerNumber)
-       WHERE orderDate = '2003-01-31';
+The following query works using a `JOIN`. Rewrite it so that it uses a subquery instead.
+
+```
+SELECT
+    customerNumber,
+    contactLastName,
+    contactFirstName
+FROM customers
+JOIN orders 
+    USING(customerNumber)
+WHERE orderDate = '2003-01-31'
+;
 ```
 
 
 ```python
-cur.execute("""SELECT customerNumber, contactLastName, contactFirstName
-               FROM customers
-               WHERE customerNumber IN (SELECT customerNumber 
-                                        FROM orders 
-                                        WHERE orderDate = '2003-01-31');
-                                        """)
-df = pd.DataFrame(cur.fetchall())
-df.columns = [x[0] for x in cur.description]
-df
+q = """
+SELECT
+    customerNumber,
+    contactLastName,
+    contactFirstName
+FROM customers
+WHERE customerNumber IN (
+    SELECT customerNumber 
+    FROM orders 
+    WHERE orderDate = '2003-01-31'
+)
+;
+"""
+pd.read_sql(q, conn)
 ```
 
 
@@ -103,21 +110,20 @@ Sort the results by the total number of items sold for that product.
 
 
 ```python
-cur.execute("""SELECT productName, COUNT(orderNumber) as numberOrders, SUM(quantityOrdered) as totalUnitsSold
-               FROM products
-               JOIN orderdetails
-               USING (productCode)
-               GROUP BY productName
-               ORDER BY totalUnitsSold desc;
-               """)
-df = pd.DataFrame(cur.fetchall())
-df.columns = [x[0] for x in cur.description]
-print(df.shape)
-df.tail()
+q = """
+SELECT
+    productName,
+    COUNT(orderNumber) AS numberOrders,
+    SUM(quantityOrdered) AS totalUnitsSold
+FROM products
+JOIN orderdetails
+    USING (productCode)
+GROUP BY productName
+ORDER BY totalUnitsSold DESC
+;
+"""
+pd.read_sql(q, conn)
 ```
-
-    (109, 3)
-
 
 
 
@@ -146,6 +152,42 @@ df.tail()
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <th>0</th>
+      <td>1992 Ferrari 360 Spider red</td>
+      <td>53</td>
+      <td>1808</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1937 Lincoln Berline</td>
+      <td>28</td>
+      <td>1111</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>American Airlines: MD-11S</td>
+      <td>28</td>
+      <td>1085</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1941 Chevrolet Special Deluxe Cabriolet</td>
+      <td>28</td>
+      <td>1076</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1930 Buick Marquette Phaeton</td>
+      <td>28</td>
+      <td>1074</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
     <tr>
       <th>104</th>
       <td>1999 Indy 500 Monte Carlo SS</td>
@@ -178,6 +220,7 @@ df.tail()
     </tr>
   </tbody>
 </table>
+<p>109 rows × 3 columns</p>
 </div>
 
 
@@ -194,18 +237,18 @@ Inside a table, a column often contains many duplicate values; and sometimes you
 
 
 ```python
-cur.execute("""SELECT productName, COUNT(DISTINCT customerNumber) AS numPurchasers
-               FROM products
-               JOIN orderdetails
-               USING(productCode)
-               JOIN orders
-               USING(orderNumber)
-               GROUP BY productName
-               ORDER BY numPurchasers DESC;
-               """)
-df = pd.DataFrame(cur.fetchall())
-df.columns = [x[0] for x in cur.description]
-df.head()
+q = """
+SELECT productName, COUNT(DISTINCT customerNumber) AS numPurchasers
+FROM products
+JOIN orderdetails
+    USING(productCode)
+JOIN orders
+    USING(orderNumber)
+GROUP BY productName
+ORDER BY numPurchasers DESC
+;
+"""
+pd.read_sql(q, conn)
 ```
 
 
@@ -241,58 +284,96 @@ df.head()
     </tr>
     <tr>
       <th>1</th>
-      <td>1934 Ford V8 Coupe</td>
+      <td>Boeing X-32A JSF</td>
       <td>27</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1952 Alpine Renault 1300</td>
-      <td>27</td>
-    </tr>
-    <tr>
-      <th>3</th>
       <td>1972 Alfa Romeo GTA</td>
       <td>27</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>Boeing X-32A JSF</td>
+      <th>3</th>
+      <td>1952 Alpine Renault 1300</td>
       <td>27</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1934 Ford V8 Coupe</td>
+      <td>27</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>104</th>
+      <td>1958 Chevy Corvette Limited Edition</td>
+      <td>19</td>
+    </tr>
+    <tr>
+      <th>105</th>
+      <td>2002 Chevy Corvette</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <th>106</th>
+      <td>1969 Chevrolet Camaro Z28</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <th>107</th>
+      <td>1952 Citroen-15CV</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <th>108</th>
+      <td>1949 Jaguar XK 120</td>
+      <td>18</td>
     </tr>
   </tbody>
 </table>
+<p>109 rows × 2 columns</p>
 </div>
 
 
 
-## Select the Employee Number, First Name, Last Name, City (of the office), and Office Code of the Employees Who Sold Products Which Have Been Ordered by Less Then 20 people.
+## Select the Employee Number, First Name, Last Name, City (of the office), and Office Code of the Employees Who Sold Products That Have Been Ordered by Fewer Than 20 people.
 
 This problem is a bit tougher. To start, think about how you might break the problem up. Be sure that your results only list each employee once.
 
 
 ```python
-cur.execute("""SELECT DISTINCT employeeNumber, officeCode, o.city, firstName, lastName
-               FROM employees e
-               JOIN offices o
-               USING(officeCode)
-               JOIN customers c
-               ON e.employeeNumber = c.salesRepEmployeeNumber
-               JOIN orders
-               USING(customerNumber)
-               JOIN orderdetails
-               USING(orderNumber)
-               WHERE productCode IN (SELECT productCode
-                                            FROM products
-                                            JOIN orderdetails
-                                            USING(productCode)
-                                            JOIN orders
-                                            USING(orderNumber)
-                                            GROUP BY productCode
-                                            HAVING COUNT(DISTINCT customerNumber) < 20);
-                                            """)
-df = pd.DataFrame(cur.fetchall())
-df.columns = [x[0] for x in cur.description]
-df
+q = """
+SELECT
+    DISTINCT employeeNumber,
+    officeCode,
+    o.city,
+    firstName,
+    lastName
+FROM employees AS e
+JOIN offices AS o
+    USING(officeCode)
+JOIN customers AS c
+    ON e.employeeNumber = c.salesRepEmployeeNumber
+JOIN orders
+    USING(customerNumber)
+JOIN orderdetails
+    USING(orderNumber)
+WHERE productCode IN (
+    SELECT productCode
+    FROM products
+    JOIN orderdetails
+        USING(productCode)
+    JOIN orders
+        USING(orderNumber)
+    GROUP BY productCode
+    HAVING COUNT(DISTINCT customerNumber) < 20
+)
+;
+"""
+pd.read_sql(q, conn)
 ```
 
 
@@ -450,20 +531,24 @@ df
 
 
 
-## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Whose Customers Have an Average Credit Limit of Over 15K
+## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Whose Customers Have an Average Credit Limit Over 15K
 
 
 ```python
-cur.execute("""SELECT employeeNumber, firstName, lastName, COUNT(customerNumber) AS numCustomers
-               FROM employees e
-               JOIN customers c
-               ON e.employeeNumber = c.salesRepEmployeeNumber
-               GROUP BY employeeNumber, firstName, lastName
-               HAVING AVG(creditLimit) > 15000;
-               """)
-df = pd.DataFrame(cur.fetchall())
-df.columns = [x[0] for x in cur.description]
-df
+q = """
+SELECT
+    employeeNumber,
+    firstName,
+    lastName,
+    COUNT(customerNumber) AS numCustomers
+FROM employees AS e
+JOIN customers As c
+    ON e.employeeNumber = c.salesRepEmployeeNumber
+GROUP BY employeeNumber
+HAVING AVG(creditLimit) > 15000
+;
+"""
+pd.read_sql(q, conn)
 ```
 
 
