@@ -1,4 +1,3 @@
-
 # SQL Subqueries - Lab
 
 ## Introduction
@@ -11,7 +10,7 @@ You will be able to:
 
 * Write subqueries to decompose complex queries
 
-## CRM Database Schema
+## CRM Database ERD
 
 Once again, here's the schema for the CRM database you'll continue to practice with.
 
@@ -19,7 +18,7 @@ Once again, here's the schema for the CRM database you'll continue to practice w
 
 ## Connect to the Database
 
-As usual, start by importing the necessary packages and connecting to the database **data.sqlite**.
+As usual, start by importing the necessary packages and connecting to the database `data.sqlite`.
 
 
 ```python
@@ -28,24 +27,28 @@ As usual, start by importing the necessary packages and connecting to the databa
 
 
 ```python
-# Your code here; create the connection and cursor
+# Your code here; create the connection
 ```
 
 ## Write an Equivalent Query using a Subquery
 
-```SQL
-SELECT customerNumber,
-       contactLastName,
-       contactFirstName
-       FROM customers
-       JOIN orders 
-       USING(customerNumber)
-       WHERE orderDate = '2003-01-31';
+The following query works using a `JOIN`. Rewrite it so that it uses a subquery instead.
+
+```
+SELECT
+    customerNumber,
+    contactLastName,
+    contactFirstName
+FROM customers
+JOIN orders 
+    USING(customerNumber)
+WHERE orderDate = '2003-01-31'
+;
 ```
 
 
 ```python
-# Your code here; use a subquery. No join is necessary 
+# Your code here
 ```
 
 ## Select the Total Number of Orders for Each Product Name
@@ -69,11 +72,11 @@ Inside a table, a column often contains many duplicate values; and sometimes you
 
 
 ```python
-# Your code here:
+# Your code here
 # Hint: because one of the tables we'll be joining has duplicate customer numbers, you should use DISTINCT
 ```
 
-## Select the Employee Number, First Name, Last Name, City (of the office), and Office Code of the Employees Who Sold Products Which Have Been Ordered by Less Then 20 people.
+## Select the Employee Number, First Name, Last Name, City (of the office), and Office Code of the Employees Who Sold Products That Have Been Ordered by Fewer Than 20 people.
 
 This problem is a bit tougher. To start, think about how you might break the problem up. Be sure that your results only list each employee once.
 
@@ -82,7 +85,7 @@ This problem is a bit tougher. To start, think about how you might break the pro
 # Your code here
 ```
 
-## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Whose Customers Have an Average Credit Limit of Over 15K
+## Select the Employee Number, First Name, Last Name, and Number of Customers for Employees Whose Customers Have an Average Credit Limit Over 15K
 
 
 ```python
